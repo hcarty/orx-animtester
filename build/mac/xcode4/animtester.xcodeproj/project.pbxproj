@@ -1,0 +1,420 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 45;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		351124CE6E0337913CCD7772 /* animtester.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 51A8086D4C92339A7C536EA5 /* animtester.cpp */; };
+		3BF21A28590564403DD72B5D /* imgui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 063E7C134B1B070301BE0AE2 /* imgui.cpp */; };
+		4AE73390493D78AE02067EC0 /* imgui_demo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6D6C650B649263E850DC54B3 /* imgui_demo.cpp */; };
+		566D1E374BFE123B72FB779F /* imgui_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7E6867ED174B7B1E7F2D72D8 /* imgui_draw.cpp */; };
+		0B9B00440CC4196562BD791E /* imgui_tables.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 10B02F30101F152B6127675B /* imgui_tables.cpp */; };
+		53584FC25AA311DD7A3345DF /* imgui_widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 519604707105194D1E793820 /* imgui_widgets.cpp */; };
+		4A3030FD403D68991E2E053D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 66E2281A53DE250C4145305B /* Foundation.framework */; };
+		7DBB3A1620C5218E0E187823 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7D7A15CB7D6A62F237242A79 /* AppKit.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		15D7652B259C63C214740BBE /* CreationTemplate.ini */ = {isa = PBXFileReference; lastKnownFileType = text; name = "CreationTemplate.ini"; path = "../../../data/config/CreationTemplate.ini"; sourceTree = "<group>"; };
+		6D7875BA45E172A9439B0566 /* SettingsTemplate.ini */ = {isa = PBXFileReference; lastKnownFileType = text; name = "SettingsTemplate.ini"; path = "../../../data/config/SettingsTemplate.ini"; sourceTree = "<group>"; };
+		0044158F1DA95EF12D316EEA /* animtester.ini */ = {isa = PBXFileReference; lastKnownFileType = text; name = "animtester.ini"; path = "../../../data/config/animtester.ini"; sourceTree = "<group>"; };
+		5B8E7DAA278511E57D071768 /* animtesterd.ini */ = {isa = PBXFileReference; lastKnownFileType = text; name = "animtesterd.ini"; path = "../../../data/config/animtesterd.ini"; sourceTree = "<group>"; };
+		4F2335185BCF335E6BF0670B /* animtesterp.ini */ = {isa = PBXFileReference; lastKnownFileType = text; name = "animtesterp.ini"; path = "../../../data/config/animtesterp.ini"; sourceTree = "<group>"; };
+		44C703B856CD6AF269D541F6 /* imconfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "imconfig.h"; path = "../../../include/imgui/imconfig.h"; sourceTree = "<group>"; };
+		329016EC68215D732F721D89 /* imgui.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "imgui.h"; path = "../../../include/imgui/imgui.h"; sourceTree = "<group>"; };
+		1D2B77F03D680C2018BF25BA /* imgui_internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "imgui_internal.h"; path = "../../../include/imgui/imgui_internal.h"; sourceTree = "<group>"; };
+		5757353F5F8537DD25895074 /* imstb_rectpack.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "imstb_rectpack.h"; path = "../../../include/imgui/imstb_rectpack.h"; sourceTree = "<group>"; };
+		20825C6B210C1B7669867197 /* imstb_textedit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "imstb_textedit.h"; path = "../../../include/imgui/imstb_textedit.h"; sourceTree = "<group>"; };
+		7A1648704188696651C718F3 /* imstb_truetype.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "imstb_truetype.h"; path = "../../../include/imgui/imstb_truetype.h"; sourceTree = "<group>"; };
+		1C6A7B957CDB1BCB5E7B71FD /* orxImGui.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "orxImGui.h"; path = "../../../include/orxImGui.h"; sourceTree = "<group>"; };
+		51A8086D4C92339A7C536EA5 /* animtester.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "animtester.cpp"; path = "../../../src/animtester.cpp"; sourceTree = "<group>"; };
+		063E7C134B1B070301BE0AE2 /* imgui.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "imgui.cpp"; path = "../../../src/imgui/imgui.cpp"; sourceTree = "<group>"; };
+		6D6C650B649263E850DC54B3 /* imgui_demo.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "imgui_demo.cpp"; path = "../../../src/imgui/imgui_demo.cpp"; sourceTree = "<group>"; };
+		7E6867ED174B7B1E7F2D72D8 /* imgui_draw.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "imgui_draw.cpp"; path = "../../../src/imgui/imgui_draw.cpp"; sourceTree = "<group>"; };
+		10B02F30101F152B6127675B /* imgui_tables.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "imgui_tables.cpp"; path = "../../../src/imgui/imgui_tables.cpp"; sourceTree = "<group>"; };
+		519604707105194D1E793820 /* imgui_widgets.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "imgui_widgets.cpp"; path = "../../../src/imgui/imgui_widgets.cpp"; sourceTree = "<group>"; };
+		66E2281A53DE250C4145305B /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "Foundation.framework"; path = "/System/Library/Frameworks/Foundation.framework"; sourceTree = "<absolute>"; };
+		7D7A15CB7D6A62F237242A79 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "AppKit.framework"; path = "/System/Library/Frameworks/AppKit.framework"; sourceTree = "<absolute>"; };
+		7B591FE574E424DE12263DBB /* animtesterd */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = "animtesterd"; path = "animtesterd"; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		173C1EFA487B0F3D1D783F2B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4A3030FD403D68991E2E053D /* Foundation.framework in Frameworks */,
+				7DBB3A1620C5218E0E187823 /* AppKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		2598365120B5532E738B3B47 /* animtester */ = {
+			isa = PBXGroup;
+			children = (
+				60C95FA9033651EB3FAD788D /* config */,
+				3A1F689323505B3447824DC8 /* include */,
+				32754F8E2CCD7896656A33F1 /* src */,
+				389D6D9B05A72AC6625400F5 /* Frameworks */,
+				748408D75FF84F116C432A51 /* Products */,
+			);
+			name = "animtester";
+			sourceTree = "<group>";
+		};
+		60C95FA9033651EB3FAD788D /* config */ = {
+			isa = PBXGroup;
+			children = (
+				15D7652B259C63C214740BBE /* CreationTemplate.ini */,
+				6D7875BA45E172A9439B0566 /* SettingsTemplate.ini */,
+				0044158F1DA95EF12D316EEA /* animtester.ini */,
+				5B8E7DAA278511E57D071768 /* animtesterd.ini */,
+				4F2335185BCF335E6BF0670B /* animtesterp.ini */,
+			);
+			name = "config";
+			sourceTree = "<group>";
+		};
+		3A1F689323505B3447824DC8 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				3CF26C60202106DD38583C27 /* imgui */,
+				1C6A7B957CDB1BCB5E7B71FD /* orxImGui.h */,
+			);
+			name = "include";
+			sourceTree = "<group>";
+		};
+		3CF26C60202106DD38583C27 /* imgui */ = {
+			isa = PBXGroup;
+			children = (
+				44C703B856CD6AF269D541F6 /* imconfig.h */,
+				329016EC68215D732F721D89 /* imgui.h */,
+				1D2B77F03D680C2018BF25BA /* imgui_internal.h */,
+				5757353F5F8537DD25895074 /* imstb_rectpack.h */,
+				20825C6B210C1B7669867197 /* imstb_textedit.h */,
+				7A1648704188696651C718F3 /* imstb_truetype.h */,
+			);
+			name = "imgui";
+			sourceTree = "<group>";
+		};
+		32754F8E2CCD7896656A33F1 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				51A8086D4C92339A7C536EA5 /* animtester.cpp */,
+				62A600FF17BA6D3A0130105A /* imgui */,
+			);
+			name = "src";
+			sourceTree = "<group>";
+		};
+		62A600FF17BA6D3A0130105A /* imgui */ = {
+			isa = PBXGroup;
+			children = (
+				063E7C134B1B070301BE0AE2 /* imgui.cpp */,
+				6D6C650B649263E850DC54B3 /* imgui_demo.cpp */,
+				7E6867ED174B7B1E7F2D72D8 /* imgui_draw.cpp */,
+				10B02F30101F152B6127675B /* imgui_tables.cpp */,
+				519604707105194D1E793820 /* imgui_widgets.cpp */,
+			);
+			name = "imgui";
+			sourceTree = "<group>";
+		};
+		389D6D9B05A72AC6625400F5 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				66E2281A53DE250C4145305B /* Foundation.framework */,
+				7D7A15CB7D6A62F237242A79 /* AppKit.framework */,
+			);
+			name = "Frameworks";
+			sourceTree = "<group>";
+		};
+		748408D75FF84F116C432A51 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				7B591FE574E424DE12263DBB /* animtesterd */,
+			);
+			name = "Products";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		4DC948143F4E44C84975465E /* animtester */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5D992604021414480D7D4095 /* Build configuration list for PBXNativeTarget "animtester" */;
+			buildPhases = (
+				10C711B8674F25F121C11AF6 /* Resources */,
+				3ECA4E6D79AC1FFC731B12E1 /* Sources */,
+				173C1EFA487B0F3D1D783F2B /* Frameworks */,
+				9607AE3710C85E8F00CD1376 /* Postbuild */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "animtester";
+			productInstallPath = "$(HOME)/bin";
+			productName = "animtester";
+			productReference = 7B591FE574E424DE12263DBB /* animtesterd */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		08FB7793FE84155DC02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "animtester" */;
+			compatibilityVersion = "Xcode 3.2";
+			hasScannedForEncodings = 1;
+			mainGroup = 2598365120B5532E738B3B47 /* animtester */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				4DC948143F4E44C84975465E /* animtesterd */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		10C711B8674F25F121C11AF6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		9607AE3710C85E8F00CD1376 /* Postbuild */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = Postbuild;
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "cp -f /Users/hcarty/projects/orx/code/lib/dynamic/liborx*.dylib ../../../bin";
+		};
+/* End PBXShellScriptBuildPhase section */
+/* Begin PBXSourcesBuildPhase section */
+		3ECA4E6D79AC1FFC731B12E1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				351124CE6E0337913CCD7772 /* animtester.cpp in Sources */,
+				3BF21A28590564403DD72B5D /* imgui.cpp in Sources */,
+				4AE73390493D78AE02067EC0 /* imgui_demo.cpp in Sources */,
+				566D1E374BFE123B72FB779F /* imgui_draw.cpp in Sources */,
+				0B9B00440CC4196562BD791E /* imgui_tables.cpp in Sources */,
+				53584FC25AA311DD7A3345DF /* imgui_widgets.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		45B0260749720289124D26A5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CONFIGURATION_BUILD_DIR = ../../../bin;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				PRODUCT_NAME = "animtesterd";
+			};
+			name = "Debug";
+		};
+		62F15F0D580F4ABD41AD736D /* Profile */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CONFIGURATION_BUILD_DIR = ../../../bin;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				PRODUCT_NAME = "animtesterp";
+			};
+			name = "Profile";
+		};
+		21145E992221516351F21549 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CONFIGURATION_BUILD_DIR = ../../../bin;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				PRODUCT_NAME = "animtester";
+			};
+			name = "Release";
+		};
+		22910A7D2C147089611A1761 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "x86_64";
+				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
+				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_CPP_EXCEPTIONS = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"__orxDEBUG__",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"../../../../orx/code/include",
+					"../../../include/imgui",
+					"../../../include",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"../../../../orx/code/lib/dynamic",
+				);
+				OBJROOT = "obj/x64/Debug";
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CFLAGS = (
+					"-ffast-math",
+					"-stdlib=libc++",
+					"-gdwarf-2",
+					"-Wno-unused-function",
+					"-Wno-write-strings",
+				);
+				OTHER_LDFLAGS = (
+					"-lorxd",
+					"-stdlib=libc++",
+					"-dead_strip",
+				);
+				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
+				SYMROOT = "../../../bin";
+			};
+			name = "Debug";
+		};
+		270C24F85304547F64587065 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "x86_64";
+				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
+				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_CPP_EXCEPTIONS = NO;
+				GCC_ENABLE_CPP_RTTI = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"__orxPROFILER__",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"../../../../orx/code/include",
+					"../../../include/imgui",
+					"../../../include",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"../../../../orx/code/lib/dynamic",
+				);
+				OBJROOT = "obj/x64/Profile";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CFLAGS = (
+					"-ffast-math",
+					"-stdlib=libc++",
+					"-gdwarf-2",
+					"-Wno-unused-function",
+					"-Wno-write-strings",
+				);
+				OTHER_LDFLAGS = (
+					"-lorxp",
+					"-stdlib=libc++",
+					"-dead_strip",
+				);
+				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
+				SYMROOT = "../../../bin";
+			};
+			name = "Profile";
+		};
+		1CF26AB2664D75AF3BBE5E14 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "x86_64";
+				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
+				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_CPP_EXCEPTIONS = NO;
+				GCC_ENABLE_CPP_RTTI = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"../../../../orx/code/include",
+					"../../../include/imgui",
+					"../../../include",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"../../../../orx/code/lib/dynamic",
+				);
+				OBJROOT = "obj/x64/Release";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CFLAGS = (
+					"-ffast-math",
+					"-stdlib=libc++",
+					"-gdwarf-2",
+					"-Wno-unused-function",
+					"-Wno-write-strings",
+				);
+				OTHER_LDFLAGS = (
+					"-lorx",
+					"-stdlib=libc++",
+					"-dead_strip",
+				);
+				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
+				SYMROOT = "../../../bin";
+			};
+			name = "Release";
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		5D992604021414480D7D4095 /* Build configuration list for PBXNativeTarget "animtesterd" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				45B0260749720289124D26A5 /* Debug */,
+				62F15F0D580F4ABD41AD736D /* Profile */,
+				21145E992221516351F21549 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = "Debug";
+		};
+		1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "animtester" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				22910A7D2C147089611A1761 /* Debug */,
+				270C24F85304547F64587065 /* Profile */,
+				1CF26AB2664D75AF3BBE5E14 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = "Debug";
+		};
+/* End XCConfigurationList section */
+
+	};
+	rootObject = 08FB7793FE84155DC02AAC07 /* Project object */;
+}

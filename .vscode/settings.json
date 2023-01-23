@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "iosfwd": "cpp",
+        "string": "cpp",
+        "optional": "cpp",
+        "type_traits": "cpp",
+        "variant": "cpp",
+        "array": "cpp"
+    }
+}

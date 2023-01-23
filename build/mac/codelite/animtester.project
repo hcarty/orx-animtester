@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CodeLite_Project Name="animtester">
+  <VirtualDirectory Name="animtester">
+    <VirtualDirectory Name="config">
+      <File Name="../../../data/config/CreationTemplate.ini"/>
+      <File Name="../../../data/config/SettingsTemplate.ini"/>
+      <File Name="../../../data/config/animtester.ini"/>
+      <File Name="../../../data/config/animtesterd.ini"/>
+      <File Name="../../../data/config/animtesterp.ini"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="include">
+      <VirtualDirectory Name="imgui">
+        <File Name="../../../include/imgui/imconfig.h"/>
+        <File Name="../../../include/imgui/imgui.h"/>
+        <File Name="../../../include/imgui/imgui_internal.h"/>
+        <File Name="../../../include/imgui/imstb_rectpack.h"/>
+        <File Name="../../../include/imgui/imstb_textedit.h"/>
+        <File Name="../../../include/imgui/imstb_truetype.h"/>
+      </VirtualDirectory>
+      <File Name="../../../include/orxImGui.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="src">
+      <File Name="../../../src/animtester.cpp"/>
+      <VirtualDirectory Name="imgui">
+        <File Name="../../../src/imgui/imgui.cpp"/>
+        <File Name="../../../src/imgui/imgui_demo.cpp"/>
+        <File Name="../../../src/imgui/imgui_draw.cpp"/>
+        <File Name="../../../src/imgui/imgui_tables.cpp"/>
+        <File Name="../../../src/imgui/imgui_widgets.cpp"/>
+      </VirtualDirectory>
+    </VirtualDirectory>
+  </VirtualDirectory>
+  <Settings Type="Executable">
+    <Configuration Name="Debug_x64" CompilerType="GCC" DebuggerType="GNU gdb debugger" Type="Executable">
+      <General OutputFile="../../../bin/animtesterd" IntermediateDirectory="$(ConfigurationName)" Command="./animtesterd" CommandArguments="" WorkingDirectory="../../../bin" PauseExecWhenProcTerminates="yes"/>
+      <Compiler Required="yes" Options="-ffast-math;-g;-m64;-fno-exceptions;-stdlib=libc++;-gdwarf-2;-Wno-unused-function;-Wno-write-strings" C_Options="-ffast-math;-g;-m64;-stdlib=libc++;-gdwarf-2;-Wno-unused-function;-Wno-write-strings">
+        <IncludePath Value="$(ORX)/include"/>
+        <IncludePath Value="../../../include/imgui"/>
+        <IncludePath Value="../../../include"/>
+        <Preprocessor Value="__orxDEBUG__"/>
+      </Compiler>
+      <Linker Required="yes" Options="-m64;-L/usr/lib64;-stdlib=libc++;-dead_strip;-framework Foundation;-framework AppKit">
+        <LibraryPath Value="$(ORX)/lib/dynamic" />
+        <LibraryPath Value="." />
+        <Library Value="orxd" />
+      </Linker>
+      <ResourceCompiler Required="no" Options=""/>
+      <PostBuild>
+        <Command Enabled="yes">cp -f $(ORX)/lib/dynamic/liborx*.dylib ../../../bin</Command>
+      </PostBuild>
+      <CustomBuild Enabled="no">
+        <CleanCommand></CleanCommand>
+        <BuildCommand></BuildCommand>
+        <SingleFileCommand></SingleFileCommand>
+        <MakefileGenerationCommand></MakefileGenerationCommand>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory></WorkingDirectory>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild></CustomPostBuild>
+        <CustomPreBuild></CustomPreBuild>
+      </AdditionalRules>
+    </Configuration>
+    <Configuration Name="Profile_x64" CompilerType="GCC" DebuggerType="GNU gdb debugger" Type="Executable">
+      <General OutputFile="../../../bin/animtesterp" IntermediateDirectory="$(ConfigurationName)" Command="./animtesterp" CommandArguments="" WorkingDirectory="../../../bin" PauseExecWhenProcTerminates="yes"/>
+      <Compiler Required="yes" Options="-ffast-math;-g;-O2;-m64;-fno-exceptions;-fno-rtti;-stdlib=libc++;-gdwarf-2;-Wno-unused-function;-Wno-write-strings" C_Options="-ffast-math;-g;-O2;-m64;-stdlib=libc++;-gdwarf-2;-Wno-unused-function;-Wno-write-strings">
+        <IncludePath Value="$(ORX)/include"/>
+        <IncludePath Value="../../../include/imgui"/>
+        <IncludePath Value="../../../include"/>
+        <Preprocessor Value="__orxPROFILER__"/>
+      </Compiler>
+      <Linker Required="yes" Options="-m64;-L/usr/lib64;-stdlib=libc++;-dead_strip;-framework Foundation;-framework AppKit">
+        <LibraryPath Value="$(ORX)/lib/dynamic" />
+        <LibraryPath Value="." />
+        <Library Value="orxp" />
+      </Linker>
+      <ResourceCompiler Required="no" Options=""/>
+      <PostBuild>
+        <Command Enabled="yes">cp -f $(ORX)/lib/dynamic/liborx*.dylib ../../../bin</Command>
+      </PostBuild>
+      <CustomBuild Enabled="no">
+        <CleanCommand></CleanCommand>
+        <BuildCommand></BuildCommand>
+        <SingleFileCommand></SingleFileCommand>
+        <MakefileGenerationCommand></MakefileGenerationCommand>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory></WorkingDirectory>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild></CustomPostBuild>
+        <CustomPreBuild></CustomPreBuild>
+      </AdditionalRules>
+    </Configuration>
+    <Configuration Name="Release_x64" CompilerType="GCC" DebuggerType="GNU gdb debugger" Type="Executable">
+      <General OutputFile="../../../bin/animtester" IntermediateDirectory="$(ConfigurationName)" Command="./animtester" CommandArguments="" WorkingDirectory="../../../bin" PauseExecWhenProcTerminates="yes"/>
+      <Compiler Required="yes" Options="-ffast-math;-g;-O2;-m64;-fno-exceptions;-fno-rtti;-stdlib=libc++;-gdwarf-2;-Wno-unused-function;-Wno-write-strings" C_Options="-ffast-math;-g;-O2;-m64;-stdlib=libc++;-gdwarf-2;-Wno-unused-function;-Wno-write-strings">
+        <IncludePath Value="$(ORX)/include"/>
+        <IncludePath Value="../../../include/imgui"/>
+        <IncludePath Value="../../../include"/>
+      </Compiler>
+      <Linker Required="yes" Options="-m64;-L/usr/lib64;-stdlib=libc++;-dead_strip;-framework Foundation;-framework AppKit">
+        <LibraryPath Value="$(ORX)/lib/dynamic" />
+        <LibraryPath Value="." />
+        <Library Value="orx" />
+      </Linker>
+      <ResourceCompiler Required="no" Options=""/>
+      <PostBuild>
+        <Command Enabled="yes">cp -f $(ORX)/lib/dynamic/liborx*.dylib ../../../bin</Command>
+      </PostBuild>
+      <CustomBuild Enabled="no">
+        <CleanCommand></CleanCommand>
+        <BuildCommand></BuildCommand>
+        <SingleFileCommand></SingleFileCommand>
+        <MakefileGenerationCommand></MakefileGenerationCommand>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory></WorkingDirectory>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild></CustomPostBuild>
+        <CustomPreBuild></CustomPreBuild>
+      </AdditionalRules>
+    </Configuration>
+  </Settings>
+  <Dependencies name="Debug_x64">
+  </Dependencies>
+  <Dependencies name="Profile_x64">
+  </Dependencies>
+  <Dependencies name="Release_x64">
+  </Dependencies>
+</CodeLite_Project>
