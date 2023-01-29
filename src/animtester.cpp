@@ -99,6 +99,38 @@ namespace config
 
 namespace gui
 {
+    void AnimSetWindow(const orxSTRING animSetName)
+    {
+        static const auto configKey = "FrameSize";
+
+        if (orxConfig_PushSection(animSetName))
+        {
+            orxCHAR title[256];
+            orxString_NPrint(title, sizeof(title), "Animation Set: %s", animSetName);
+
+            ImGui::Begin(title);
+
+            auto frameSize = orxVECTOR_0;
+            orxConfig_GetVector(configKey, &frameSize);
+
+            int x = frameSize.fX;
+            int y = frameSize.fY;
+            auto setX = ImGui::InputInt("X Frame Size", &x, 1, 8);
+            auto setY = ImGui::InputInt("Y Frame Size", &y, 1, 8);
+            if (setX || setY)
+            {
+                configChanged = orxTRUE;
+                frameSize.fX = x;
+                frameSize.fY = y;
+                orxConfig_SetVector(configKey, &frameSize);
+            }
+
+            orxConfig_PopSection();
+
+            ImGui::End();
+        }
+    }
+
     void AnimWindow(const orxSTRING animSetName, const orxSTRING prefix, const orxSTRING name)
     {
         orxCHAR sectionName[256];
@@ -106,7 +138,7 @@ namespace gui
         if (orxConfig_PushSection(sectionName))
         {
             orxCHAR buffer[256];
-            orxString_NPrint(buffer, sizeof(buffer), "Animation %s", name);
+            orxString_NPrint(buffer, sizeof(buffer), "Animation: %s", name);
             ImGui::Begin(buffer);
 
             // Number of frames
@@ -147,12 +179,13 @@ namespace gui
         }
     }
 
-    void ScaleSlider(orxOBJECT *object)
+    void ScaleInput(orxOBJECT *object)
     {
         // Object scale
         auto scale = orxVECTOR_0;
         orxObject_GetScale(object, &scale);
-        ImGui::SliderFloat("Scale", &scale.fX, 0.0, 10.0);
+        ImGui::InputFloat("Scale", &scale.fX, 1, 2);
+        scale.fX = orxCLAMP(scale.fX, 0.0, 64.0);
         scale.fY = scale.fX;
         orxObject_SetScale(object, &scale);
     }
@@ -219,17 +252,23 @@ namespace gui
         {
             AnimWindow(animSetName.data(), prefix.data(), selectedAnimation.data());
         }
+        if (animSetName.length() > 0)
+        {
+            AnimSetWindow(animSetName.data());
+        }
     }
 
     void ObjectWindow(orxOBJECT *object)
     {
         orxASSERT(object);
-        ImGui::Begin("Object Control");
+        orxCHAR title[256];
+        orxString_NPrint(title, sizeof(title), "Object %s", orxObject_GetName(object));
 
-        ScaleSlider(object);
+        ImGui::Begin(title);
+
+        ScaleInput(object);
         AnimationText(object);
         AnimationRateInput(object);
-        // AnimationTargetTree(object);
         AnimationCombo(object);
 
         ImGui::End();
