@@ -4,6 +4,7 @@
  */
 
 #include <algorithm>
+#include <optional>
 #include <string>
 #include <vector>
 #include "orx.h"
@@ -20,16 +21,51 @@ __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 
 #endif // __orxMSVC__
 
+const orxSTRING objectName = "Knight";
+orxOBJECT *targetObject = orxNULL;
+orxBOOL configChanged = orxFALSE;
+
 namespace object
 {
-    std::vector<orxANIM *> GetAnims(orxOBJECT *object, bool sorted = true)
+    std::optional<orxANIMSET *> GetAnimSet(orxOBJECT *object)
     {
         auto animPointer = orxOBJECT_GET_STRUCTURE(object, ANIMPOINTER);
-        orxASSERT(animPointer);
+        if (!animPointer)
+            return std::nullopt;
+
         auto animSet = orxAnimPointer_GetAnimSet(animPointer);
-        orxASSERT(animSet);
+        if (!animSet)
+            return std::nullopt;
+
+        return animSet;
+    }
+
+    const orxSTRING GetAnimSetName(orxOBJECT *object)
+    {
+        auto animSet = GetAnimSet(object);
+        if (animSet.has_value())
+        {
+            return orxAnimSet_GetName(animSet.value());
+        }
+        else
+        {
+            return orxSTRING_EMPTY;
+        }
+    }
+
+    std::vector<orxANIM *> GetAnims(orxOBJECT *object, bool sorted = true)
+    {
+        std::vector<orxANIM *> animations{};
+
+        auto maybeAnim = GetAnimSet(object);
+        if (!maybeAnim.has_value())
+        {
+            return animations;
+        }
+        auto animSet = maybeAnim.value();
+
         auto animationCount = orxAnimSet_GetAnimCount(animSet);
-        auto animations = std::vector<orxANIM *>(animationCount);
+        animations.resize(animationCount);
         for (orxU32 i = 0; i < animationCount; i++)
         {
             animations[i] = orxAnimSet_GetAnim(animSet, i);
@@ -41,8 +77,76 @@ namespace object
     }
 }
 
+namespace config
+{
+    int GetAnimFrames(const orxSTRING animSetName, const orxSTRING animName)
+    {
+        // Get number of frames in the animation from the animation set
+        orxConfig_PushSection(animSetName);
+        auto frames = orxConfig_GetU32(animName);
+        orxConfig_PopSection();
+        return frames;
+    }
+
+    void SetAnimFrames(const orxSTRING animSetName, const orxSTRING animName, const orxU32 frames)
+    {
+        // Set number of frames in the animation in the animation set
+        orxConfig_PushSection(animSetName);
+        orxConfig_SetU32(animName, frames);
+        orxConfig_PopSection();
+    }
+}
+
 namespace gui
 {
+    void AnimWindow(const orxSTRING animSetName, const orxSTRING prefix, const orxSTRING name)
+    {
+        orxCHAR sectionName[256];
+        orxString_NPrint(sectionName, sizeof(sectionName), "%s%s", prefix, name);
+        if (orxConfig_PushSection(sectionName))
+        {
+            orxCHAR buffer[256];
+            orxString_NPrint(buffer, sizeof(buffer), "Animation %s", name);
+            ImGui::Begin(buffer);
+
+            // Number of frames
+            auto frames = config::GetAnimFrames(animSetName, name);
+            auto setFrames = ImGui::InputInt("Frames", &frames, 1, 2);
+            if (setFrames)
+            {
+                configChanged = orxTRUE;
+                config::SetAnimFrames(animSetName, name, frames);
+            }
+
+            // Frame duration
+            auto duration = orxConfig_GetFloat("KeyDuration");
+            auto setDuration = ImGui::InputFloat("Key Duration", &duration, 0.01, 0.05);
+            if (setDuration)
+            {
+                configChanged = orxTRUE;
+                orxConfig_SetFloat("KeyDuration", duration);
+            }
+
+            // Texture origin
+            orxVECTOR origin = orxVECTOR_0;
+            orxConfig_GetVector("TextureOrigin", &origin);
+            int x = origin.fX;
+            int y = origin.fY;
+            auto setX = ImGui::InputInt("X Origin", &x, 1, 8);
+            auto setY = ImGui::InputInt("Y Origin", &y, 1, 8);
+            if (setX || setY)
+            {
+                configChanged = orxTRUE;
+                origin.fX = x;
+                origin.fY = y;
+                orxConfig_SetVector("TextureOrigin", &origin);
+            }
+
+            ImGui::End();
+            orxConfig_PopSection();
+        }
+    }
+
     void ScaleSlider(orxOBJECT *object)
     {
         // Object scale
@@ -72,6 +176,14 @@ namespace gui
         orxObject_SetAnimFrequency(object, animationRate);
     }
 
+    void AnimationRateInput(orxOBJECT *object)
+    {
+        // Animation rate
+        auto animationRate = orxObject_GetAnimFrequency(object);
+        ImGui::InputFloat("Animation rate", &animationRate, 0.1, 1.0);
+        orxObject_SetAnimFrequency(object, animationRate);
+    }
+
     void AnimationTargetTree(orxOBJECT *object)
     {
         auto currentAnimation = orxObject_GetCurrentAnim(object);
@@ -79,30 +191,91 @@ namespace gui
         // Target animation
         if (ImGui::TreeNode("Target animation"))
         {
+            auto targetAnimation = orxObject_GetTargetAnim(object);
+
+            // Get animation section prefix, if there is one
+            auto animSetName = object::GetAnimSetName(object);
+            orxASSERT(orxString_GetLength(animSetName) > 0);
+
+            orxConfig_PushSection(animSetName);
+            auto prefix = orxConfig_GetString("Prefix");
+            orxConfig_PopSection();
+
             // Get the animation set for the object
             auto animations = object::GetAnims(object);
             for (auto anim : animations)
             {
+                static const orxSTRING selected = orxSTRING_EMPTY;
                 // Add a selector for each available target animation
                 auto animName = orxAnim_GetName(anim);
-                auto active = false;
-                ImGui::Selectable(animName, &active);
-                if (active)
+                auto active = selected == animName;
+                if (ImGui::Selectable(animName, active))
+                {
+                    selected = animName;
                     orxObject_SetTargetAnim(object, animName);
+                }
+                if (active)
+                    AnimWindow(animSetName, prefix, animName);
             }
             ImGui::TreePop();
         }
     }
 
-    void AnimationWindow(orxOBJECT *object)
+    void AnimationCombo(orxOBJECT *object)
+    {
+        auto currentAnimation = orxObject_GetCurrentAnim(object);
+        auto targetAnimation = orxObject_GetTargetAnim(object);
+
+        static std::string selectedAnimation{};
+        static std::string animSetName{};
+        static std::string prefix{};
+
+        // Target animation
+        if (ImGui::BeginCombo("Target animation", targetAnimation))
+        {
+            // Get animation section prefix, if there is one
+            animSetName = object::GetAnimSetName(object);
+            orxASSERT(orxString_GetLength(animSetName) > 0);
+
+            orxConfig_PushSection(animSetName.data());
+            prefix = orxConfig_GetString("Prefix");
+            orxConfig_PopSection();
+
+            // Get the animation set for the object
+            auto animations = object::GetAnims(object);
+
+            for (auto anim : animations)
+            {
+                // Add a selector for each available target animation
+                auto animName = orxAnim_GetName(anim);
+                auto active = selectedAnimation == animName;
+                if (ImGui::Selectable(animName, active))
+                {
+                    selectedAnimation = animName;
+                    orxObject_SetTargetAnim(object, animName);
+                }
+                if (active)
+                    ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndCombo();
+        }
+
+        if (selectedAnimation.length() > 0)
+        {
+            AnimWindow(animSetName.data(), prefix.data(), selectedAnimation.data());
+        }
+    }
+
+    void ObjectWindow(orxOBJECT *object)
     {
         orxASSERT(object);
-        ImGui::Begin("Animation Control");
+        ImGui::Begin("Object Control");
 
         ScaleSlider(object);
         AnimationText(object);
-        AnimationRateSlider(object);
-        AnimationTargetTree(object);
+        AnimationRateInput(object);
+        // AnimationTargetTree(object);
+        AnimationCombo(object);
 
         ImGui::End();
     }
@@ -112,10 +285,31 @@ namespace gui
  */
 void orxFASTCALL Update(const orxCLOCK_INFO *_pstClockInfo, void *_pContext)
 {
-    auto targetObject = (orxOBJECT *)_pContext;
+    if (configChanged)
+    {
+        configChanged = orxFALSE;
+        // Get some animation information for the current object so we can
+        // propagate it to the replacement object.
+        auto currentAnimation = orxObject_GetCurrentAnim(targetObject);
+        auto targetAnimation = orxObject_GetTargetAnim(targetObject);
+        auto animationTime = orxObject_GetAnimTime(targetObject);
 
+        // Delete to current object so that the associated animset is freed
+        // now, rather than potentially delaying the deletion until the next
+        // frame. Then we can create a new object using the update config
+        // values.
+        orxObject_Delete(targetObject);
+
+        // Create a new object and align its animation and animation time to
+        // the values for the previous target object.
+        targetObject = orxObject_CreateFromConfig(objectName);
+        orxObject_SetCurrentAnim(targetObject, currentAnimation);
+        orxObject_SetTargetAnim(targetObject, targetAnimation);
+        orxObject_SetAnimTime(targetObject, animationTime);
+        orxASSERT(targetObject);
+    }
     // Show animation control window
-    gui::AnimationWindow(targetObject);
+    gui::ObjectWindow(targetObject);
 
     // Should quit?
     if (orxInput_IsActive("Quit"))
@@ -136,11 +330,11 @@ orxSTATUS orxFASTCALL Init()
     orxViewport_CreateFromConfig("MainViewport");
 
     // Create the scene
-    auto targetObject = orxObject_CreateFromConfig("Knight");
+    targetObject = orxObject_CreateFromConfig(objectName);
     orxASSERT(targetObject);
 
     // Register the Update function to the core clock
-    orxClock_Register(orxClock_Get(orxCLOCK_KZ_CORE), Update, (void *)targetObject, orxMODULE_ID_MAIN, orxCLOCK_PRIORITY_NORMAL);
+    orxClock_Register(orxClock_Get(orxCLOCK_KZ_CORE), Update, orxNULL, orxMODULE_ID_MAIN, orxCLOCK_PRIORITY_NORMAL);
 
     // Done!
     return orxSTATUS_SUCCESS;
