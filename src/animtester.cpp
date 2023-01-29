@@ -168,57 +168,12 @@ namespace gui
         ImGui::LabelText("Target animation", "%s", targetAnimation);
     }
 
-    void AnimationRateSlider(orxOBJECT *object)
-    {
-        // Animation rate
-        auto animationRate = orxObject_GetAnimFrequency(object);
-        ImGui::SliderFloat("Animation rate", &animationRate, 0.0, 1.0);
-        orxObject_SetAnimFrequency(object, animationRate);
-    }
-
     void AnimationRateInput(orxOBJECT *object)
     {
         // Animation rate
         auto animationRate = orxObject_GetAnimFrequency(object);
         ImGui::InputFloat("Animation rate", &animationRate, 0.1, 1.0);
         orxObject_SetAnimFrequency(object, animationRate);
-    }
-
-    void AnimationTargetTree(orxOBJECT *object)
-    {
-        auto currentAnimation = orxObject_GetCurrentAnim(object);
-
-        // Target animation
-        if (ImGui::TreeNode("Target animation"))
-        {
-            auto targetAnimation = orxObject_GetTargetAnim(object);
-
-            // Get animation section prefix, if there is one
-            auto animSetName = object::GetAnimSetName(object);
-            orxASSERT(orxString_GetLength(animSetName) > 0);
-
-            orxConfig_PushSection(animSetName);
-            auto prefix = orxConfig_GetString("Prefix");
-            orxConfig_PopSection();
-
-            // Get the animation set for the object
-            auto animations = object::GetAnims(object);
-            for (auto anim : animations)
-            {
-                static const orxSTRING selected = orxSTRING_EMPTY;
-                // Add a selector for each available target animation
-                auto animName = orxAnim_GetName(anim);
-                auto active = selected == animName;
-                if (ImGui::Selectable(animName, active))
-                {
-                    selected = animName;
-                    orxObject_SetTargetAnim(object, animName);
-                }
-                if (active)
-                    AnimWindow(animSetName, prefix, animName);
-            }
-            ImGui::TreePop();
-        }
     }
 
     void AnimationCombo(orxOBJECT *object)
