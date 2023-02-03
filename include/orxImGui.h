@@ -184,8 +184,8 @@ static orxSTATUS orxFASTCALL orxImGui_EndFrame(const orxEVENT *_pstEvent)
           stMesh.u32VertexNumber  = pstDrawList->VtxBuffer.Size - rstCommand.VtxOffset;
           stMesh.au16IndexList    = pstDrawList->IdxBuffer.Data + rstCommand.IdxOffset;
           stMesh.u32IndexNumber   = rstCommand.ElemCount;
-          orxDisplay_SetBitmapClipping(orxNULL, orxF2U(rstCommand.ClipRect.x - pstDrawData->DisplayPos.x), orxF2U(rstCommand.ClipRect.y - pstDrawData->DisplayPos.y), orxF2U(rstCommand.ClipRect.z - pstDrawData->DisplayPos.x), orxF2U(rstCommand.ClipRect.w - pstDrawData->DisplayPos.y));
-          orxDisplay_DrawMesh(&stMesh, (orxBITMAP *)rstCommand.TextureId, orxDISPLAY_SMOOTHING_ON, orxDISPLAY_BLEND_MODE_ALPHA);
+          // Smoothing is off everywhere so that textures in GUI widgets have no smoothing applied
+          orxDisplay_DrawMesh(&stMesh, (orxBITMAP *)rstCommand.TextureId, orxDISPLAY_SMOOTHING_OFF, orxDISPLAY_BLEND_MODE_ALPHA);
         }
         stMesh.au16IndexList += rstCommand.ElemCount;
       }
