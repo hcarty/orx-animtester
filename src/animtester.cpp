@@ -113,16 +113,71 @@ namespace gui
             auto frameSize = orxVECTOR_0;
             orxConfig_GetVector(configKey, &frameSize);
 
-            int x = frameSize.fX;
-            int y = frameSize.fY;
-            auto setX = ImGui::InputInt("X Frame Size", &x, 1, 8);
-            auto setY = ImGui::InputInt("Y Frame Size", &y, 1, 8);
-            if (setX || setY)
+            // Set frame size
             {
-                configChanged = orxTRUE;
-                frameSize.fX = x;
-                frameSize.fY = y;
-                orxConfig_SetVector(configKey, &frameSize);
+                int x = frameSize.fX;
+                int y = frameSize.fY;
+                auto setX = ImGui::InputInt("X Frame Size", &x, 1, 8);
+                auto setY = ImGui::InputInt("Y Frame Size", &y, 1, 8);
+                if (setX || setY)
+                {
+                    configChanged = orxTRUE;
+                    frameSize.fX = x;
+                    frameSize.fY = y;
+                    orxConfig_SetVector(configKey, &frameSize);
+                }
+            }
+
+            // Show source texture
+            {
+                static auto snap = false;
+                ImGui::Checkbox("Snap tooltip to frame size", &snap);
+
+                // Capture IO (mouse) information
+                ImGuiIO &io = ImGui::GetIO();
+                ImVec2 pos = ImGui::GetCursorScreenPos();
+
+                auto texture = orxTexture_Get(orxConfig_GetString("Texture"));
+                float textureWidth, textureHeight;
+                orxTexture_GetSize(texture, &textureWidth, &textureHeight);
+                auto textureID = (ImTextureID)orxTexture_GetBitmap(texture);
+                ImGui::Image(textureID, {textureWidth, textureHeight});
+
+                // Zoomed in tooltip - based on imgui_demo.cpp
+                if (ImGui::IsItemHovered())
+                {
+                    ImGui::BeginTooltip();
+                    float region_x = io.MousePos.x - pos.x - frameSize.fX * 0.5f;
+                    float region_y = io.MousePos.y - pos.y - frameSize.fY * 0.5f;
+                    if (snap)
+                    {
+                        region_x = floorf(region_x / frameSize.fX) * frameSize.fX;
+                        region_y = floorf(region_y / frameSize.fY) * frameSize.fY;
+                    }
+                    float zoom = 4.0f;
+                    if (region_x < 0.0f)
+                    {
+                        region_x = 0.0f;
+                    }
+                    else if (region_x > textureWidth - frameSize.fX)
+                    {
+                        region_x = textureWidth - frameSize.fX;
+                    }
+                    if (region_y < 0.0f)
+                    {
+                        region_y = 0.0f;
+                    }
+                    else if (region_y > textureHeight - frameSize.fY)
+                    {
+                        region_y = textureHeight - frameSize.fY;
+                    }
+                    ImGui::Text("Min: (%.2f, %.2f)", region_x, region_y);
+                    ImGui::Text("Max: (%.2f, %.2f)", region_x + frameSize.fX, region_y + frameSize.fY);
+                    ImVec2 uv0 = ImVec2((region_x) / textureWidth, (region_y) / textureHeight);
+                    ImVec2 uv1 = ImVec2((region_x + frameSize.fX) / textureWidth, (region_y + frameSize.fY) / textureHeight);
+                    ImGui::Image(textureID, ImVec2(frameSize.fX * zoom, frameSize.fY * zoom), uv0, uv1);
+                    ImGui::EndTooltip();
+                }
             }
 
             orxConfig_PopSection();
@@ -209,7 +264,7 @@ namespace gui
         orxObject_SetAnimFrequency(object, animationRate);
     }
 
-    void AnimationCombo(orxOBJECT *object)
+    void TargetAnimationCombo(orxOBJECT *object)
     {
         auto currentAnimation = orxObject_GetCurrentAnim(object);
         auto targetAnimation = orxObject_GetTargetAnim(object);
@@ -252,10 +307,6 @@ namespace gui
         {
             AnimWindow(animSetName.data(), prefix.data(), selectedAnimation.data());
         }
-        if (animSetName.length() > 0)
-        {
-            AnimSetWindow(animSetName.data());
-        }
     }
 
     void ObjectWindow(orxOBJECT *object)
@@ -269,7 +320,7 @@ namespace gui
         ScaleInput(object);
         AnimationText(object);
         AnimationRateInput(object);
-        AnimationCombo(object);
+        TargetAnimationCombo(object);
 
         ImGui::End();
     }
@@ -302,8 +353,10 @@ void orxFASTCALL Update(const orxCLOCK_INFO *_pstClockInfo, void *_pContext)
         orxObject_SetAnimTime(targetObject, animationTime);
         orxASSERT(targetObject);
     }
-    // Show animation control window
+
+    // Show top level windows
     gui::ObjectWindow(targetObject);
+    gui::AnimSetWindow(object::GetAnimSetName(targetObject));
 
     // Should quit?
     if (orxInput_IsActive("Quit"))
