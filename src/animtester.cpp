@@ -21,7 +21,7 @@ __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 
 #endif // __orxMSVC__
 
-const orxSTRING objectName = "Knight";
+const orxSTRING objectName = "Character";
 orxOBJECT *targetObject = orxNULL;
 orxBOOL configChanged = orxFALSE;
 
@@ -452,7 +452,7 @@ namespace gui
         {
             // Get animation section prefix, if there is one
             animSetName = object::GetAnimSetName(object);
-            orxASSERT(orxString_GetLength(animSetName) > 0);
+            orxASSERT(animSetName.length() > 0);
 
             config::GetAnimSetPrefix(animSetName.data());
 
