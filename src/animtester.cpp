@@ -25,47 +25,14 @@ const orxSTRING objectName = "Knight";
 orxOBJECT *targetObject = orxNULL;
 orxBOOL configChanged = orxFALSE;
 
-namespace object
+namespace animset
 {
-    std::optional<orxANIMSET *> GetAnimSet(orxOBJECT *object)
+    std::vector<orxANIM *> GetAnims(const orxANIMSET *animSet, bool sorted = true)
     {
-        auto animPointer = orxOBJECT_GET_STRUCTURE(object, ANIMPOINTER);
-        if (!animPointer)
-            return std::nullopt;
-
-        auto animSet = orxAnimPointer_GetAnimSet(animPointer);
-        if (!animSet)
-            return std::nullopt;
-
-        return animSet;
-    }
-
-    const orxSTRING GetAnimSetName(orxOBJECT *object)
-    {
-        auto animSet = GetAnimSet(object);
-        if (animSet.has_value())
-        {
-            return orxAnimSet_GetName(animSet.value());
-        }
-        else
-        {
-            return orxSTRING_EMPTY;
-        }
-    }
-
-    std::vector<orxANIM *> GetAnims(orxOBJECT *object, bool sorted = true)
-    {
-        std::vector<orxANIM *> animations{};
-
-        auto maybeAnim = GetAnimSet(object);
-        if (!maybeAnim.has_value())
-        {
-            return animations;
-        }
-        auto animSet = maybeAnim.value();
-
         auto animationCount = orxAnimSet_GetAnimCount(animSet);
+        std::vector<orxANIM *> animations{};
         animations.resize(animationCount);
+
         for (orxU32 i = 0; i < animationCount; i++)
         {
             animations[i] = orxAnimSet_GetAnim(animSet, i);
@@ -74,6 +41,31 @@ namespace object
             std::sort(animations.begin(), animations.end(), [](auto a, auto b)
                       { return std::string{orxAnim_GetName(a)} < std::string{orxAnim_GetName(b)}; });
         return animations;
+    }
+}
+
+namespace object
+{
+    orxANIMSET *GetAnimSet(orxOBJECT *object)
+    {
+        auto animPointer = orxOBJECT_GET_STRUCTURE(object, ANIMPOINTER);
+        orxASSERT(animPointer);
+        auto animSet = orxAnimPointer_GetAnimSet(animPointer);
+        orxASSERT(animSet);
+
+        return animSet;
+    }
+
+    const orxSTRING GetAnimSetName(orxOBJECT *object)
+    {
+        auto animSet = GetAnimSet(object);
+        return orxAnimSet_GetName(animSet);
+    }
+
+    std::vector<orxANIM *> GetAnims(orxOBJECT *object, bool sorted = true)
+    {
+        auto animSet = GetAnimSet(object);
+        return animset::GetAnims(animSet);
     }
 }
 
@@ -110,20 +102,51 @@ namespace config
         orxString_NPrint(buf, bufSize, "%s%s", prefix, animName);
     }
 
-    void AddAnimLink(const orxSTRING animSetName, const orxSTRING srcAnim, const orxSTRING dstPrefix, const orxSTRING dstAnim)
+    void GetAnimLinkSource(const orxSTRING animName, orxSTRING out, size_t outLen)
+    {
+        orxString_NPrint(out, outLen, "%s->", animName);
+    }
+
+    std::vector<const orxCHAR *> GetAnimLinks(const orxSTRING animSetName, const orxSTRING srcAnim)
+    {
+        orxConfig_PushSection(animSetName);
+        orxCHAR src[64];
+        GetAnimLinkSource(srcAnim, src, sizeof(src));
+        auto count = orxConfig_GetListCount(src);
+        std::vector<const orxCHAR *> dests{};
+        dests.resize(count);
+        for (size_t i = 0; i < count; i++)
+        {
+            dests[i] = orxConfig_GetListString(src, i);
+        }
+        orxConfig_PopSection();
+        return dests;
+    }
+
+    std::string AnimSourceName(const orxSTRING animName)
+    {
+        return std::string{animName} + "->";
+    }
+
+    void AddAnimLink(const orxSTRING animSetName, const orxSTRING srcAnim, const orxSTRING dstAnim)
     {
         orxConfig_PushSection(animSetName);
 
         // Source has a -> suffix
-        orxCHAR linkSrc[orxString_GetLength(srcAnim) + 2 + 1];
-        orxString_NPrint(linkSrc, sizeof(linkSrc), "%s->", srcAnim);
+        auto src = AnimSourceName(srcAnim);
 
-        // Destination may have a prefix
-        orxCHAR linkDst[orxString_GetLength(dstPrefix) + orxString_GetLength(dstAnim) + 1];
-        orxString_NPrint(linkDst, sizeof(linkDst), "%s%s", dstPrefix, dstAnim);
+        orxConfig_AppendListString(src.data(), &dstAnim, 1);
+        orxConfig_PopSection();
+    }
 
-        const orxCHAR *ptrDst = linkDst;
-        orxConfig_AppendListString(linkSrc, &ptrDst, 1);
+    void SetAnimLinks(const orxSTRING animSetName, const orxSTRING srcAnim, std::vector<std::string> &dstAnims)
+    {
+        auto src = AnimSourceName(srcAnim);
+        orxConfig_PushSection(animSetName);
+        orxCHAR *links[dstAnims.size()];
+        for (int i = 0; i < dstAnims.size(); i++)
+            links[i] = dstAnims[i].data();
+        orxConfig_SetListString(src.data(), (const orxCHAR **)links, dstAnims.size());
         orxConfig_PopSection();
     }
 
@@ -186,8 +209,9 @@ namespace gui
         }
     }
 
-    void AnimSetWindow(const orxSTRING animSetName)
+    void AnimSetWindow(const orxANIMSET *animSet)
     {
+        auto animSetName = orxAnimSet_GetName(animSet);
         static const auto configKey = "FrameSize";
 
         if (orxConfig_PushSection(animSetName))
@@ -224,9 +248,6 @@ namespace gui
                 if (ImGui::IsItemActivated())
                 {
                     configChanged = orxTRUE;
-                    orxConfig_PushSection(animSetName);
-                    auto initialAnim = orxConfig_GetString("StartAnim");
-                    orxConfig_PopSection();
 
                     config::SetAnimFrames(animSetName, newAnimName, 1);
                     config::AddStartAnim(animSetName, newAnimName);
@@ -241,7 +262,90 @@ namespace gui
                 }
             }
 
+            // Show all animations in the set
+            if (ImGui::CollapsingHeader("Animations"))
+            {
+                static const orxSTRING selectedAnimation = orxSTRING_EMPTY;
+                auto animations = animset::GetAnims(animSet);
+                for (auto anim : animations)
+                {
+                    auto name = orxAnim_GetName(anim);
+                    bool selected = orxString_Compare(name, selectedAnimation) == 0;
+                    if (ImGui::Selectable(name, selected))
+                    {
+                        selectedAnimation = name;
+                    }
+                    if (selected)
+                    {
+                        // Separate window for viewing/editing config for the selected animation
+                        AnimWindow(animSetName, config::GetAnimSetPrefix(animSetName), name);
+
+                        // Track changes to animation links so we can apply them
+                        auto changed = false;
+                        std::vector<std::string> updatedLinks;
+
+                        ImGui::PushID(name);
+
+                        // Animation links for the selected animation
+                        if (ImGui::CollapsingHeader("Links"))
+                        {
+                            const auto links = config::GetAnimLinks(animSetName, name);
+                            for (const auto link : links)
+                            {
+                                ImGui::PushID(link);
+
+                                std::string originalLink{link};
+                                orxCHAR linkText[64];
+                                orxString_NCopy(linkText, link, sizeof(linkText));
+
+                                ImGui::InputTextWithHint("", "<animation link>", linkText, sizeof(linkText));
+                                ImGui::SameLine();
+                                auto apply = ImGui::Button("Apply");
+                                ImGui::SameLine();
+                                auto remove = ImGui::Button("Remove");
+
+                                if (!remove)
+                                {
+                                    if (!apply)
+                                        updatedLinks.push_back(originalLink);
+                                    else
+                                        updatedLinks.push_back(std::string{linkText});
+                                }
+
+                                if (apply || remove)
+                                    changed = true;
+
+                                ImGui::PopID();
+                            }
+
+                            // Add a new link
+                            ImGui::PushID("New Link Input");
+                            static orxCHAR linkText[64] = "";
+                            ImGui::InputTextWithHint("", "<animation link>", linkText, sizeof(linkText));
+                            ImGui::SameLine();
+                            auto add = ImGui::Button("Add");
+                            ImGui::PopID();
+                            if (add)
+                            {
+                                changed = true;
+                                updatedLinks.push_back(std::string{linkText});
+                                linkText[0] = '\0';
+                            }
+                        }
+
+                        ImGui::PopID();
+
+                        if (changed)
+                        {
+                            configChanged = orxTRUE;
+                            config::SetAnimLinks(animSetName, name, updatedLinks);
+                        }
+                    }
+                }
+            }
+
             // Show source texture
+            if (ImGui::CollapsingHeader("Source texture"))
             {
                 static auto snap = false;
                 ImGui::Checkbox("Snap tooltip to frame size", &snap);
@@ -363,17 +467,13 @@ namespace gui
                 if (ImGui::Selectable(animName, active))
                 {
                     selectedAnimation = animName;
-                    orxObject_SetTargetAnim(object, animName);
+                    // orxObject_SetTargetAnim(object, animName);
+                    orxObject_SetCurrentAnim(object, animName);
                 }
                 if (active)
                     ImGui::SetItemDefaultFocus();
             }
             ImGui::EndCombo();
-        }
-
-        if (selectedAnimation.length() > 0)
-        {
-            AnimWindow(animSetName.data(), prefix.data(), selectedAnimation.data());
         }
     }
 
@@ -425,7 +525,7 @@ void orxFASTCALL Update(const orxCLOCK_INFO *_pstClockInfo, void *_pContext)
 
     // Show top level windows
     gui::ObjectWindow(targetObject);
-    gui::AnimSetWindow(object::GetAnimSetName(targetObject));
+    gui::AnimSetWindow(object::GetAnimSet(targetObject));
 
     // Should quit?
     if (orxInput_IsActive("Quit"))
