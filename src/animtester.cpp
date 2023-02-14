@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <optional>
+#include <set>
 #include <string>
 #include <vector>
 #include "orx.h"
@@ -24,6 +25,7 @@ __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 const orxSTRING objectName = "Character";
 orxOBJECT *targetObject = orxNULL;
 orxBOOL configChanged = orxFALSE;
+std::optional<std::string> save = std::nullopt;
 
 namespace animset
 {
@@ -156,6 +158,36 @@ namespace config
         orxConfig_AppendListString("StartAnimList", &animName, 1);
         orxConfig_PopSection();
     }
+
+    // Saving animation changes to config
+    std::set<std::string> sectionsToSave{};
+
+    orxBOOL SaveCallback(const orxSTRING section, const orxSTRING key, const orxSTRING file, orxBOOL useEncryption)
+    {
+        return sectionsToSave.contains(std::string{section});
+    }
+
+    void Save(const orxSTRING file, orxOBJECT *object)
+    {
+        // Save the animation set section
+        auto animSet = object::GetAnimSet(object);
+        sectionsToSave.insert(orxAnimSet_GetName(animSet));
+
+        // Save the section for each individual animation
+        auto anims = object::GetAnims(object);
+        for (auto anim : anims)
+        {
+            orxCHAR buf[256];
+            GetAnimSectionName(orxAnimSet_GetName(animSet), orxAnim_GetName(anim), buf, sizeof(buf));
+            sectionsToSave.insert(buf);
+        }
+
+        orxConfig_Save(file, orxFALSE, SaveCallback);
+
+        // Clear the set of sections to save
+        sectionsToSave.clear();
+    }
+
 }
 
 namespace gui
@@ -220,6 +252,12 @@ namespace gui
             orxString_NPrint(title, sizeof(title), "Animation Set: %s", animSetName);
 
             ImGui::Begin(title);
+
+            // Save changes
+            if (ImGui::Button("Save"))
+            {
+                save = std::string{orxConfig_GetOrigin(animSetName)};
+            }
 
             auto frameSize = orxVECTOR_0;
             orxConfig_GetVector(configKey, &frameSize);
@@ -499,6 +537,7 @@ namespace gui
  */
 void orxFASTCALL Update(const orxCLOCK_INFO *_pstClockInfo, void *_pContext)
 {
+    // Re-create the object if configuration has changed
     if (configChanged)
     {
         configChanged = orxFALSE;
@@ -521,6 +560,12 @@ void orxFASTCALL Update(const orxCLOCK_INFO *_pstClockInfo, void *_pContext)
         orxObject_SetTargetAnim(targetObject, targetAnimation);
         orxObject_SetAnimTime(targetObject, animationTime);
         orxASSERT(targetObject);
+    }
+
+    // Save our changes if requested
+    if (save.has_value())
+    {
+        config::Save(save.value().data(), targetObject);
     }
 
     // Show top level windows
