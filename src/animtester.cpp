@@ -153,7 +153,9 @@ namespace config
             orxConfig_SetListString(src.data(), (const orxCHAR **)links, dstAnims.size());
         }
         else
+        {
             orxConfig_ClearValue(src.data());
+        }
         orxConfig_PopSection();
     }
 
@@ -251,204 +253,203 @@ namespace gui
         auto animSetName = orxAnimSet_GetName(animSet);
         static const auto configKey = "FrameSize";
 
-        if (orxConfig_PushSection(animSetName))
+        orxASSERT(orxConfig_PushSection(animSetName));
+
+        orxCHAR title[256];
+        orxString_NPrint(title, sizeof(title), "Animation Set: %s", animSetName);
+
+        ImGui::Begin(title);
+
+        // Save changes
+        if (ImGui::Button("Save"))
         {
-            orxCHAR title[256];
-            orxString_NPrint(title, sizeof(title), "Animation Set: %s", animSetName);
+            save = std::string{orxConfig_GetOrigin(animSetName)};
+        }
 
-            ImGui::Begin(title);
+        auto frameSize = orxVECTOR_0;
+        orxConfig_GetVector(configKey, &frameSize);
 
-            // Save changes
-            if (ImGui::Button("Save"))
+        // Set frame size
+        {
+            int x = frameSize.fX;
+            int y = frameSize.fY;
+            auto setX = ImGui::InputInt("X Frame Size", &x, 1, 8);
+            auto setY = ImGui::InputInt("Y Frame Size", &y, 1, 8);
+            if (setX || setY)
             {
-                save = std::string{orxConfig_GetOrigin(animSetName)};
+                configChanged = orxTRUE;
+                frameSize.fX = x;
+                frameSize.fY = y;
+                orxConfig_SetVector(configKey, &frameSize);
             }
+        }
 
-            auto frameSize = orxVECTOR_0;
-            orxConfig_GetVector(configKey, &frameSize);
-
-            // Set frame size
+        // Add a new animation
+        {
+            static orxCHAR newAnimName[64];
+            ImGui::InputTextWithHint("", "<new animation name>", newAnimName, sizeof(newAnimName));
+            ImGui::SameLine();
+            ImGui::SmallButton("Add animation");
+            if (ImGui::IsItemActivated())
             {
-                int x = frameSize.fX;
-                int y = frameSize.fY;
-                auto setX = ImGui::InputInt("X Frame Size", &x, 1, 8);
-                auto setY = ImGui::InputInt("Y Frame Size", &y, 1, 8);
-                if (setX || setY)
+                configChanged = orxTRUE;
+
+                config::SetAnimFrames(animSetName, newAnimName, 1);
+                config::AddStartAnim(animSetName, newAnimName);
+                // config::AddAnimLink(animSetName, initialAnim, ".", newAnimName);
+
+                orxCHAR sectionName[64];
+                config::GetAnimSectionName(animSetName, newAnimName, sectionName, sizeof(sectionName));
+                orxConfig_PushSection(sectionName);
+                orxConfig_SetFloat("KeyDuration", 0.1);
+                orxConfig_SetVector("TextureOrigin", &orxVECTOR_0);
+                orxConfig_PopSection();
+            }
+        }
+
+        // Show all animations in the set
+        if (ImGui::CollapsingHeader("Animations"))
+        {
+            static const orxSTRING selectedAnimation = orxSTRING_EMPTY;
+            auto animations = animset::GetAnims(animSet);
+            for (auto anim : animations)
+            {
+                auto name = orxAnim_GetName(anim);
+                bool selected = orxString_Compare(name, selectedAnimation) == 0;
+                if (ImGui::Selectable(name, selected))
                 {
-                    configChanged = orxTRUE;
-                    frameSize.fX = x;
-                    frameSize.fY = y;
-                    orxConfig_SetVector(configKey, &frameSize);
+                    selectedAnimation = name;
                 }
-            }
-
-            // Add a new animation
-            {
-                static orxCHAR newAnimName[64];
-                ImGui::InputTextWithHint("", "<new animation name>", newAnimName, sizeof(newAnimName));
-                ImGui::SameLine();
-                ImGui::SmallButton("Add animation");
-                if (ImGui::IsItemActivated())
+                if (selected)
                 {
-                    configChanged = orxTRUE;
+                    // Separate window for viewing/editing config for the selected animation
+                    AnimWindow(animSetName, config::GetAnimSetPrefix(animSetName), name);
 
-                    config::SetAnimFrames(animSetName, newAnimName, 1);
-                    config::AddStartAnim(animSetName, newAnimName);
-                    // config::AddAnimLink(animSetName, initialAnim, ".", newAnimName);
+                    // Track changes to animation links so we can apply them
+                    auto changed = false;
+                    std::vector<std::string> updatedLinks;
 
-                    orxCHAR sectionName[64];
-                    config::GetAnimSectionName(animSetName, newAnimName, sectionName, sizeof(sectionName));
-                    orxConfig_PushSection(sectionName);
-                    orxConfig_SetFloat("KeyDuration", 0.1);
-                    orxConfig_SetVector("TextureOrigin", &orxVECTOR_0);
-                    orxConfig_PopSection();
-                }
-            }
+                    ImGui::PushID(name);
 
-            // Show all animations in the set
-            if (ImGui::CollapsingHeader("Animations"))
-            {
-                static const orxSTRING selectedAnimation = orxSTRING_EMPTY;
-                auto animations = animset::GetAnims(animSet);
-                for (auto anim : animations)
-                {
-                    auto name = orxAnim_GetName(anim);
-                    bool selected = orxString_Compare(name, selectedAnimation) == 0;
-                    if (ImGui::Selectable(name, selected))
+                    // Animation links for the selected animation
+                    if (ImGui::CollapsingHeader("Links"))
                     {
-                        selectedAnimation = name;
-                    }
-                    if (selected)
-                    {
-                        // Separate window for viewing/editing config for the selected animation
-                        AnimWindow(animSetName, config::GetAnimSetPrefix(animSetName), name);
-
-                        // Track changes to animation links so we can apply them
-                        auto changed = false;
-                        std::vector<std::string> updatedLinks;
-
-                        ImGui::PushID(name);
-
-                        // Animation links for the selected animation
-                        if (ImGui::CollapsingHeader("Links"))
+                        const auto links = config::GetAnimLinks(animSetName, name);
+                        for (const auto link : links)
                         {
-                            const auto links = config::GetAnimLinks(animSetName, name);
-                            for (const auto link : links)
-                            {
-                                ImGui::PushID(link);
+                            ImGui::PushID(link);
 
-                                std::string originalLink{link};
-                                orxCHAR linkText[64];
-                                orxString_NCopy(linkText, link, sizeof(linkText));
+                            std::string originalLink{link};
+                            orxCHAR linkText[64];
+                            orxString_NCopy(linkText, link, sizeof(linkText));
 
-                                ImGui::InputTextWithHint("", "<animation link>", linkText, sizeof(linkText));
-                                ImGui::SameLine();
-                                auto apply = ImGui::Button("Apply");
-                                ImGui::SameLine();
-                                auto remove = ImGui::Button("Remove");
-
-                                if (!remove)
-                                {
-                                    if (!apply)
-                                        updatedLinks.push_back(originalLink);
-                                    else
-                                        updatedLinks.push_back(std::string{linkText});
-                                }
-
-                                if (apply || remove)
-                                    changed = true;
-
-                                ImGui::PopID();
-                            }
-
-                            // Add a new link
-                            ImGui::PushID("New Link Input");
-                            static orxCHAR linkText[64] = "";
                             ImGui::InputTextWithHint("", "<animation link>", linkText, sizeof(linkText));
                             ImGui::SameLine();
-                            auto add = ImGui::Button("Add");
-                            ImGui::PopID();
-                            if (add)
+                            auto apply = ImGui::Button("Apply");
+                            ImGui::SameLine();
+                            auto remove = ImGui::Button("Remove");
+
+                            if (!remove)
                             {
-                                changed = true;
-                                updatedLinks.push_back(std::string{linkText});
-                                linkText[0] = '\0';
+                                if (!apply)
+                                    updatedLinks.push_back(originalLink);
+                                else
+                                    updatedLinks.push_back(std::string{linkText});
                             }
+
+                            if (apply || remove)
+                                changed = true;
+
+                            ImGui::PopID();
                         }
 
+                        // Add a new link
+                        ImGui::PushID("New Link Input");
+                        static orxCHAR linkText[64] = "";
+                        ImGui::InputTextWithHint("", "<animation link>", linkText, sizeof(linkText));
+                        ImGui::SameLine();
+                        auto add = ImGui::Button("Add");
                         ImGui::PopID();
-
-                        if (changed)
+                        if (add)
                         {
-                            configChanged = orxTRUE;
-                            config::SetAnimLinks(animSetName, name, updatedLinks);
+                            changed = true;
+                            updatedLinks.push_back(std::string{linkText});
+                            linkText[0] = '\0';
                         }
                     }
+
+                    ImGui::PopID();
+
+                    if (changed)
+                    {
+                        configChanged = orxTRUE;
+                        config::SetAnimLinks(animSetName, name, updatedLinks);
+                    }
                 }
             }
-
-            // Show source texture
-            if (ImGui::CollapsingHeader("Source texture"))
-            {
-                static auto snap = false;
-                ImGui::Checkbox("Snap tooltip to frame size", &snap);
-
-                // Capture IO (mouse) information
-                ImGuiIO &io = ImGui::GetIO();
-                ImVec2 pos = ImGui::GetCursorScreenPos();
-
-                auto texture = orxTexture_Get(orxConfig_GetString("Texture"));
-                float textureWidth, textureHeight;
-                orxTexture_GetSize(texture, &textureWidth, &textureHeight);
-                auto textureID = (ImTextureID)orxTexture_GetBitmap(texture);
-                ImGui::Image(textureID, {textureWidth, textureHeight});
-
-                // Zoomed in tooltip - based on imgui_demo.cpp
-                if (ImGui::IsItemHovered())
-                {
-                    ImGui::BeginTooltip();
-                    float regionX = orxFLOAT_0;
-                    float regionY = orxFLOAT_0;
-                    if (snap)
-                    {
-                        regionX = floorf((io.MousePos.x - pos.x) / frameSize.fX) * frameSize.fX;
-                        regionY = floorf((io.MousePos.y - pos.y) / frameSize.fY) * frameSize.fY;
-                    }
-                    else
-                    {
-                        regionX = io.MousePos.x - pos.x - frameSize.fX * 0.5f;
-                        regionY = io.MousePos.y - pos.y - frameSize.fY * 0.5f;
-                    }
-                    float zoom = 4.0f;
-                    if (regionX < 0.0f)
-                    {
-                        regionX = 0.0f;
-                    }
-                    else if (regionX > textureWidth - frameSize.fX)
-                    {
-                        regionX = textureWidth - frameSize.fX;
-                    }
-                    if (regionY < 0.0f)
-                    {
-                        regionY = 0.0f;
-                    }
-                    else if (regionY > textureHeight - frameSize.fY)
-                    {
-                        regionY = textureHeight - frameSize.fY;
-                    }
-                    ImGui::Text("Min: (%.2f, %.2f)", regionX, regionY);
-                    ImGui::Text("Max: (%.2f, %.2f)", regionX + frameSize.fX, regionY + frameSize.fY);
-                    ImVec2 uv0 = ImVec2((regionX) / textureWidth, (regionY) / textureHeight);
-                    ImVec2 uv1 = ImVec2((regionX + frameSize.fX) / textureWidth, (regionY + frameSize.fY) / textureHeight);
-                    ImGui::Image(textureID, ImVec2(frameSize.fX * zoom, frameSize.fY * zoom), uv0, uv1);
-                    ImGui::EndTooltip();
-                }
-            }
-
-            orxConfig_PopSection();
-
-            ImGui::End();
         }
+
+        // Show source texture
+        if (ImGui::CollapsingHeader("Source texture"))
+        {
+            static auto snap = false;
+            ImGui::Checkbox("Snap tooltip to frame size", &snap);
+
+            // Capture IO (mouse) information
+            ImGuiIO &io = ImGui::GetIO();
+            ImVec2 pos = ImGui::GetCursorScreenPos();
+
+            auto texture = orxTexture_Get(orxConfig_GetString("Texture"));
+            float textureWidth, textureHeight;
+            orxTexture_GetSize(texture, &textureWidth, &textureHeight);
+            auto textureID = (ImTextureID)orxTexture_GetBitmap(texture);
+            ImGui::Image(textureID, {textureWidth, textureHeight});
+
+            // Zoomed in tooltip - based on imgui_demo.cpp
+            if (ImGui::IsItemHovered())
+            {
+                ImGui::BeginTooltip();
+                float regionX = orxFLOAT_0;
+                float regionY = orxFLOAT_0;
+                if (snap)
+                {
+                    regionX = floorf((io.MousePos.x - pos.x) / frameSize.fX) * frameSize.fX;
+                    regionY = floorf((io.MousePos.y - pos.y) / frameSize.fY) * frameSize.fY;
+                }
+                else
+                {
+                    regionX = io.MousePos.x - pos.x - frameSize.fX * 0.5f;
+                    regionY = io.MousePos.y - pos.y - frameSize.fY * 0.5f;
+                }
+                float zoom = 4.0f;
+                if (regionX < 0.0f)
+                {
+                    regionX = 0.0f;
+                }
+                else if (regionX > textureWidth - frameSize.fX)
+                {
+                    regionX = textureWidth - frameSize.fX;
+                }
+                if (regionY < 0.0f)
+                {
+                    regionY = 0.0f;
+                }
+                else if (regionY > textureHeight - frameSize.fY)
+                {
+                    regionY = textureHeight - frameSize.fY;
+                }
+                ImGui::Text("Min: (%.2f, %.2f)", regionX, regionY);
+                ImGui::Text("Max: (%.2f, %.2f)", regionX + frameSize.fX, regionY + frameSize.fY);
+                ImVec2 uv0 = ImVec2((regionX) / textureWidth, (regionY) / textureHeight);
+                ImVec2 uv1 = ImVec2((regionX + frameSize.fX) / textureWidth, (regionY + frameSize.fY) / textureHeight);
+                ImGui::Image(textureID, ImVec2(frameSize.fX * zoom, frameSize.fY * zoom), uv0, uv1);
+                ImGui::EndTooltip();
+            }
+        }
+
+        orxConfig_PopSection();
+
+        ImGui::End();
     }
 
     void ScaleInput(orxOBJECT *object)
