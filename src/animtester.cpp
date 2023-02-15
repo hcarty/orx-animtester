@@ -145,10 +145,15 @@ namespace config
     {
         auto src = AnimSourceName(srcAnim);
         orxConfig_PushSection(animSetName);
-        orxCHAR *links[dstAnims.size()];
-        for (int i = 0; i < dstAnims.size(); i++)
-            links[i] = dstAnims[i].data();
-        orxConfig_SetListString(src.data(), (const orxCHAR **)links, dstAnims.size());
+        if (dstAnims.size() > 0)
+        {
+            orxCHAR *links[dstAnims.size()];
+            for (int i = 0; i < dstAnims.size(); i++)
+                links[i] = dstAnims[i].data();
+            orxConfig_SetListString(src.data(), (const orxCHAR **)links, dstAnims.size());
+        }
+        else
+            orxConfig_ClearValue(src.data());
         orxConfig_PopSection();
     }
 
