@@ -269,21 +269,6 @@ namespace gui
         auto frameSize = orxVECTOR_0;
         orxConfig_GetVector(configKey, &frameSize);
 
-        // Set frame size
-        {
-            int x = frameSize.fX;
-            int y = frameSize.fY;
-            auto setX = ImGui::InputInt("X Frame Size", &x, 1, 8);
-            auto setY = ImGui::InputInt("Y Frame Size", &y, 1, 8);
-            if (setX || setY)
-            {
-                configChanged = orxTRUE;
-                frameSize.fX = x;
-                frameSize.fY = y;
-                orxConfig_SetVector(configKey, &frameSize);
-            }
-        }
-
         // Add a new animation
         {
             static orxCHAR newAnimName[64];
@@ -296,7 +281,6 @@ namespace gui
 
                 config::SetAnimFrames(animSetName, newAnimName, 1);
                 config::AddStartAnim(animSetName, newAnimName);
-                // config::AddAnimLink(animSetName, initialAnim, ".", newAnimName);
 
                 orxCHAR sectionName[64];
                 config::GetAnimSectionName(animSetName, newAnimName, sectionName, sizeof(sectionName));
@@ -304,6 +288,8 @@ namespace gui
                 orxConfig_SetFloat("KeyDuration", 0.1);
                 orxConfig_SetVector("TextureOrigin", &orxVECTOR_0);
                 orxConfig_PopSection();
+
+                newAnimName[0] = '\0';
             }
         }
 
@@ -389,8 +375,23 @@ namespace gui
             }
         }
 
+        // Set frame size
+        {
+            int x = frameSize.fX;
+            int y = frameSize.fY;
+            auto setX = ImGui::InputInt("X Frame Size", &x, 1, 8);
+            auto setY = ImGui::InputInt("Y Frame Size", &y, 1, 8);
+            if (setX || setY)
+            {
+                configChanged = orxTRUE;
+                frameSize.fX = x;
+                frameSize.fY = y;
+                orxConfig_SetVector(configKey, &frameSize);
+            }
+        }
+
         // Show source texture
-        if (ImGui::CollapsingHeader("Source texture"))
+        if (ImGui::CollapsingHeader("Texture"))
         {
             static auto snap = false;
             ImGui::Checkbox("Snap tooltip to frame size", &snap);
@@ -525,7 +526,7 @@ namespace gui
     {
         orxASSERT(object);
         orxCHAR title[256];
-        orxString_NPrint(title, sizeof(title), "Object %s", orxObject_GetName(object));
+        orxString_NPrint(title, sizeof(title), "Object: %s", orxObject_GetName(object));
 
         ImGui::Begin(title);
 
