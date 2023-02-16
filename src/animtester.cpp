@@ -317,6 +317,8 @@ namespace gui
 
                     ImGui::PushID(name);
 
+                    ImGui::Indent();
+
                     // Animation links for the selected animation
                     if (ImGui::CollapsingHeader("Links"))
                     {
@@ -363,6 +365,8 @@ namespace gui
                             linkText[0] = '\0';
                         }
                     }
+
+                    ImGui::Unindent();
 
                     ImGui::PopID();
 
