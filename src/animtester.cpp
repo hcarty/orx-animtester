@@ -199,7 +199,7 @@ namespace config
 
 namespace gui
 {
-    void AnimWindow(const orxSTRING animSetName, const orxSTRING prefix, const orxSTRING name)
+    void AnimWindow(const orxSTRING animSetName, const orxSTRING name)
     {
         orxCHAR sectionName[256];
         config::GetAnimSectionName(animSetName, name, sectionName, sizeof(sectionName));
@@ -246,6 +246,72 @@ namespace gui
             ImGui::End();
             orxConfig_PopSection();
         }
+    }
+
+    void AnimConfig(const orxSTRING animSetName, const orxSTRING name)
+    {
+        orxCHAR sectionName[256];
+        config::GetAnimSectionName(animSetName, name, sectionName, sizeof(sectionName));
+
+        orxASSERT(orxConfig_PushSection(sectionName));
+
+        // Frame ordering
+        {
+            auto order1 = orxConfig_GetListString("Direction", 0);
+            orxCHAR rowBuf[64] = "right";
+            if (orxString_GetLength(order1) > 0)
+                orxString_NCopy(rowBuf, order1, sizeof(rowBuf));
+            auto order2 = orxConfig_GetListString("Direction", 1);
+            orxCHAR columnBuf[64] = "down";
+            if (orxString_GetLength(order2) > 0)
+                orxString_NCopy(columnBuf, order2, sizeof(columnBuf));
+            auto rowChange = ImGui::InputTextWithHint("Row order", "right", rowBuf, sizeof(rowBuf));
+            auto columnChange = ImGui::InputTextWithHint("Column order", "down", columnBuf, sizeof(columnBuf));
+            if (rowChange || columnChange)
+            {
+                configChanged = orxTRUE;
+                orxConfig_ClearValue("Direction");
+                const orxCHAR *row = rowBuf;
+                const orxCHAR *col = columnBuf;
+                orxConfig_AppendListString("Direction", &row, 1);
+                orxConfig_AppendListString("Direction", &col, 1);
+            }
+        }
+
+        // Number of frames
+        auto frames = config::GetAnimFrames(animSetName, name);
+        auto setFrames = ImGui::InputInt("Frames", &frames, 1, 2);
+        if (setFrames)
+        {
+            configChanged = orxTRUE;
+            config::SetAnimFrames(animSetName, name, frames);
+        }
+
+        // Frame duration
+        auto duration = orxConfig_GetFloat("KeyDuration");
+        auto setDuration = ImGui::InputFloat("Key Duration", &duration, 0.01, 0.05);
+        if (setDuration)
+        {
+            configChanged = orxTRUE;
+            orxConfig_SetFloat("KeyDuration", duration);
+        }
+
+        // Texture origin
+        orxVECTOR origin = orxVECTOR_0;
+        orxConfig_GetVector("TextureOrigin", &origin);
+        int x = origin.fX;
+        int y = origin.fY;
+        auto setX = ImGui::InputInt("X Origin", &x, 1, 8);
+        auto setY = ImGui::InputInt("Y Origin", &y, 1, 8);
+        if (setX || setY)
+        {
+            configChanged = orxTRUE;
+            origin.fX = x;
+            origin.fY = y;
+            orxConfig_SetVector("TextureOrigin", &origin);
+        }
+
+        orxConfig_PopSection();
     }
 
     void AnimSetWindow(const orxANIMSET *animSet)
@@ -296,28 +362,26 @@ namespace gui
         // Show all animations in the set
         if (ImGui::CollapsingHeader("Animations"))
         {
-            static const orxSTRING selectedAnimation = orxSTRING_EMPTY;
+            ImGui::Indent();
+
             auto animations = animset::GetAnims(animSet);
             for (auto anim : animations)
             {
                 auto name = orxAnim_GetName(anim);
-                bool selected = orxString_Compare(name, selectedAnimation) == 0;
-                if (ImGui::Selectable(name, selected))
+                if (ImGui::CollapsingHeader(name))
                 {
-                    selectedAnimation = name;
-                }
-                if (selected)
-                {
-                    // Separate window for viewing/editing config for the selected animation
-                    AnimWindow(animSetName, config::GetAnimSetPrefix(animSetName), name);
+                    ImGui::PushID(name);
+                    ImGui::Indent();
+
+                    // Config for the selected animation
+                    if (ImGui::CollapsingHeader("Config"))
+                    {
+                        AnimConfig(animSetName, name);
+                    }
 
                     // Track changes to animation links so we can apply them
                     auto changed = false;
                     std::vector<std::string> updatedLinks;
-
-                    ImGui::PushID(name);
-
-                    ImGui::Indent();
 
                     // Animation links for the selected animation
                     if (ImGui::CollapsingHeader("Links"))
@@ -377,6 +441,8 @@ namespace gui
                     }
                 }
             }
+
+            ImGui::Unindent();
         }
 
         // Set frame size
