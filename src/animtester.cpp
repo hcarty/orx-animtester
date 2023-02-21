@@ -296,6 +296,31 @@ namespace gui
             orxConfig_SetFloat("KeyDuration", duration);
         }
 
+        // Texture size
+        {
+            orxConfig_PushSection(animSetName);
+            orxVECTOR frameSize = orxVECTOR_0;
+            orxConfig_GetVector("FrameSize", &frameSize);
+            orxConfig_PopSection();
+
+            orxVECTOR size = frameSize;
+            if (orxConfig_HasValue("TextureSize"))
+                orxConfig_GetVector("TextureSize", &size);
+            int x = size.fX;
+            int y = size.fY;
+            ImGui::InputInt("X Size", &x, frameSize.fX, frameSize.fX);
+            auto setX = ImGui::IsItemDeactivatedAfterEdit();
+            ImGui::InputInt("Y Size", &y, frameSize.fY, frameSize.fY);
+            auto setY = ImGui::IsItemDeactivatedAfterEdit();
+            if (setX || setY)
+            {
+                configChanged = orxTRUE;
+                size.fX = x;
+                size.fY = y;
+                orxConfig_SetVector("TextureSize", &size);
+            }
+        }
+
         // Texture origin
         orxVECTOR origin = orxVECTOR_0;
         orxConfig_GetVector("TextureOrigin", &origin);
@@ -356,6 +381,21 @@ namespace gui
                 orxConfig_PopSection();
 
                 newAnimName[0] = '\0';
+            }
+        }
+
+        // Set frame size
+        {
+            int x = frameSize.fX;
+            int y = frameSize.fY;
+            auto setX = ImGui::InputInt("X Frame Size", &x, 1, 8);
+            auto setY = ImGui::InputInt("Y Frame Size", &y, 1, 8);
+            if (setX || setY)
+            {
+                configChanged = orxTRUE;
+                frameSize.fX = x;
+                frameSize.fY = y;
+                orxConfig_SetVector(configKey, &frameSize);
             }
         }
 
@@ -443,21 +483,6 @@ namespace gui
             }
 
             ImGui::Unindent();
-        }
-
-        // Set frame size
-        {
-            int x = frameSize.fX;
-            int y = frameSize.fY;
-            auto setX = ImGui::InputInt("X Frame Size", &x, 1, 8);
-            auto setY = ImGui::InputInt("Y Frame Size", &y, 1, 8);
-            if (setX || setY)
-            {
-                configChanged = orxTRUE;
-                frameSize.fX = x;
-                frameSize.fY = y;
-                orxConfig_SetVector(configKey, &frameSize);
-            }
         }
 
         // Show source texture
