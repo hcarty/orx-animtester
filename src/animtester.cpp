@@ -298,26 +298,14 @@ namespace gui
 
         // Texture size
         {
-            orxConfig_PushSection(animSetName);
-            orxVECTOR frameSize = orxVECTOR_0;
-            orxConfig_GetVector("FrameSize", &frameSize);
-            orxConfig_PopSection();
-
-            orxVECTOR size = frameSize;
-            if (orxConfig_HasValue("TextureSize"))
-                orxConfig_GetVector("TextureSize", &size);
-            int x = size.fX;
-            int y = size.fY;
-            ImGui::InputInt("X Size", &x, frameSize.fX, frameSize.fX);
-            auto setX = ImGui::IsItemDeactivatedAfterEdit();
-            ImGui::InputInt("Y Size", &y, frameSize.fY, frameSize.fY);
-            auto setY = ImGui::IsItemDeactivatedAfterEdit();
-            if (setX || setY)
+            auto tmpSize = orxConfig_GetString("TextureSize");
+            orxCHAR size[64] = {'\0'};
+            orxString_NCopy(size, tmpSize, sizeof(size));
+            ImGui::InputText("Texture Size", size, sizeof(size));
+            if (ImGui::IsItemDeactivatedAfterEdit())
             {
                 configChanged = orxTRUE;
-                size.fX = x;
-                size.fY = y;
-                orxConfig_SetVector("TextureSize", &size);
+                orxConfig_SetString("TextureSize", size);
             }
         }
 
