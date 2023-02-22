@@ -258,15 +258,17 @@ namespace gui
         // Frame ordering
         {
             auto order1 = orxConfig_GetListString("Direction", 0);
-            orxCHAR rowBuf[64] = "right";
+            static orxCHAR rowBuf[64] = "right";
             if (orxString_GetLength(order1) > 0)
                 orxString_NCopy(rowBuf, order1, sizeof(rowBuf));
             auto order2 = orxConfig_GetListString("Direction", 1);
-            orxCHAR columnBuf[64] = "down";
+            static orxCHAR columnBuf[64] = "down";
             if (orxString_GetLength(order2) > 0)
                 orxString_NCopy(columnBuf, order2, sizeof(columnBuf));
-            auto rowChange = ImGui::InputTextWithHint("Row order", "right", rowBuf, sizeof(rowBuf));
-            auto columnChange = ImGui::InputTextWithHint("Column order", "down", columnBuf, sizeof(columnBuf));
+            ImGui::InputTextWithHint("Row order", "right", rowBuf, sizeof(rowBuf));
+            auto rowChange = ImGui::IsItemDeactivatedAfterEdit();
+            ImGui::InputTextWithHint("Column order", "down", columnBuf, sizeof(columnBuf));
+            auto columnChange = ImGui::IsItemDeactivatedAfterEdit();
             if (rowChange || columnChange)
             {
                 configChanged = orxTRUE;
@@ -299,7 +301,7 @@ namespace gui
         // Texture size
         {
             auto tmpSize = orxConfig_GetString("TextureSize");
-            orxCHAR size[64] = {'\0'};
+            static orxCHAR size[64] = {'\0'};
             orxString_NCopy(size, tmpSize, sizeof(size));
             ImGui::InputText("Texture Size", size, sizeof(size));
             if (ImGui::IsItemDeactivatedAfterEdit())
@@ -350,7 +352,7 @@ namespace gui
 
         // Add a new animation
         {
-            orxCHAR newAnimName[64] = "";
+            static orxCHAR newAnimName[64] = "";
             ImGui::InputTextWithHint("", "<new animation name>", newAnimName, sizeof(newAnimName));
             ImGui::SameLine();
             ImGui::SmallButton("Add animation");
@@ -420,7 +422,7 @@ namespace gui
                             ImGui::PushID(link);
 
                             std::string originalLink{link};
-                            orxCHAR linkText[64];
+                            static orxCHAR linkText[64];
                             orxString_NCopy(linkText, link, sizeof(linkText));
 
                             ImGui::InputTextWithHint("", "<animation link>", linkText, sizeof(linkText));
