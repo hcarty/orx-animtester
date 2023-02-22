@@ -330,7 +330,7 @@ namespace gui
     void AnimSetWindow(const orxANIMSET *animSet)
     {
         auto animSetName = orxAnimSet_GetName(animSet);
-        static const auto configKey = "FrameSize";
+        auto configKey = "FrameSize";
 
         orxASSERT(orxConfig_PushSection(animSetName));
 
@@ -350,7 +350,7 @@ namespace gui
 
         // Add a new animation
         {
-            static orxCHAR newAnimName[64];
+            orxCHAR newAnimName[64] = "";
             ImGui::InputTextWithHint("", "<new animation name>", newAnimName, sizeof(newAnimName));
             ImGui::SameLine();
             ImGui::SmallButton("Add animation");
@@ -476,7 +476,7 @@ namespace gui
         // Show source texture
         if (ImGui::CollapsingHeader("Texture"))
         {
-            static auto snap = false;
+            static auto snap = true;
             ImGui::Checkbox("Snap tooltip to frame size", &snap);
 
             // Capture IO (mouse) information
@@ -568,28 +568,23 @@ namespace gui
 
     void TargetAnimationCombo(orxOBJECT *object)
     {
-        auto currentAnimation = orxObject_GetCurrentAnim(object);
         auto targetAnimation = orxObject_GetTargetAnim(object);
 
         static std::string selectedAnimation{};
-        static std::string animSetName{};
-        static std::string prefix{};
 
         // Target animation
         if (ImGui::BeginCombo("Target animation", targetAnimation))
         {
             // Get animation section prefix, if there is one
-            animSetName = object::GetAnimSetName(object);
+            auto animSetName = std::string{object::GetAnimSetName(object)};
             orxASSERT(animSetName.length() > 0);
-
-            config::GetAnimSetPrefix(animSetName.data());
 
             // Get the animation set for the object
             auto animations = object::GetAnims(object);
 
             for (auto anim : animations)
             {
-                // Add a selector for each available target animation
+                // Add a selector for each available animation
                 auto animName = orxAnim_GetName(anim);
                 auto active = selectedAnimation == animName;
                 if (ImGui::Selectable(animName, active))
